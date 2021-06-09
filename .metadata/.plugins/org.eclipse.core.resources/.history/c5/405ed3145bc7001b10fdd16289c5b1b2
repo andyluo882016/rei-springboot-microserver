@@ -1,0 +1,53 @@
+package com.example.demo.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.netflix.ribbon.RibbonClient;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.RibbonConfiguration;
+import com.example.demo.module.*;
+import com.example.demo.service.PurchaseService;
+
+@RestController
+@RequestMapping("/cart")//product-consumer-center
+@RibbonClient(name ="product-consumer-center", configuration = RibbonConfiguration.class)
+public class CartController {
+    @Autowired
+	PurchaseService purchaseService;
+    //PurchaseProduct(String itemId, Product product, String lname, Integer total)
+    @GetMapping(path="/purchase/{productId}/{lname}/{total}", produces= MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Item>> showcarts(
+    		@PathVariable("productId") final String productId,
+    		@PathVariable("lname") final String lname,
+    		@PathVariable("total") final Integer total
+    		) {
+    	
+    	ResponseEntity<List<Item>> rpcart = purchaseService.addProduct(productId, lname, total);
+    	return rpcart;
+    }
+    // PurchaseProduct(String locationName, Product product, Integer total) 
+    //PurchaseProduct(String itemId, Product product, Integer total)
+    @GetMapping(path="/addcart/{locationName}/{total}", consumes =MediaType.APPLICATION_JSON_VALUE , produces =MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Cart> purchaseProducts(
+    		@PathVariable("locationName") final String locationName,
+    		@RequestBody final Product product,
+    		@PathVariable("total") final Integer total
+    		
+    		) {
+    	
+    	ResponseEntity<Cart> respose = purchaseService.PurchaseProduct(locationName, product, total);
+    	
+    	return respose;
+    	
+    }
+}

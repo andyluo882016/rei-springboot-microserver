@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aop-reference-model>
+<aop-project name="rei-products-consumer"/>
+<aop-project name="rei-inventory-supplier"/>
+<aop-project name="rei-product-supplier"/>
+<aop-project name="rei-purchase-consumer"/>
+<aop-project name="rei-inventory-consumer"/>
+<aop-project name="rei-eureka-server"/>
+<aop-project name="local-store-server"/>
+</aop-reference-model>

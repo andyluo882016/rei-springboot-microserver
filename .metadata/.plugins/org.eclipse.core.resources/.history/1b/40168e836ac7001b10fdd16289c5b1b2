@@ -1,0 +1,170 @@
+package com.example.demo.service;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+//import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.example.demo.kafkaserver.KafkaProductProducer;
+import com.example.demo.module.Cart;
+import com.example.demo.module.Item;
+import com.example.demo.module.Product;
+
+
+@Service
+public class PurchaseService {
+
+	@Autowired
+	RestTemplate restTemplate;
+	@Autowired
+	KafkaProductProducer kafkaProductProducer;
+	
+	Map<Product, Integer> cmap = new HashMap<Product, Integer>();
+	
+	public ResponseEntity<List<Item>> addProduct(String productId, String itemId, String lname, Integer total) {
+		Cart cart =new Cart();
+		//Integer udNumber=0;
+		String _url1="http://producet-inventory-server/inventory/getitems/"+productId;
+		String _url2="http://producet-supplier-server/product/find/"+productId;
+		//String _url3="http://producet-inventory-server/inventory/update/"+itemId+"/"+total;
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+	   
+	    headers.set("REI-COM-PERSIST", "true");
+	    headers.set("REI-COM-LOCATION", "USA");
+	    headers.add("cart", "purchase-products");
+	    HttpEntity<Item[]> entity = new HttpEntity<Item[]>(headers);
+	    
+	    HttpEntity<Product> prentity = new HttpEntity<Product>(headers);
+		
+	    
+	    ResponseEntity<Item[]> itemlists = restTemplate.exchange(_url1, HttpMethod.GET, entity, Item[].class);
+		
+		 List<Item> ilist=Arrays.asList(itemlists.getBody()).stream()
+		 .filter(tms -> (tms.getLocation().getName()).equalsIgnoreCase(lname))
+		 .filter(itm -> (itm.getId()).equals(itemId))
+		 .collect(Collectors.toList());
+		  Item myitem=ilist.get(0);
+		  myitem.setQuantity(8);
+		  kafkaProductProducer.sendMessage(myitem);
+		
+	   return new ResponseEntity<List<Item>>(ilist, HttpStatus.OK);
+		 
+	}
+	//String productId, String lname, Integer total
+	@HystrixCommand(fallbackMethod="getFallbackProduct",
+			commandProperties = { 
+					@HystrixProperty(name="execution.isolation.thread.timeoutInMilliseconds", value="2000"),
+					@HystrixProperty(name="circuitBreaker.requestVolumeThreshold", value="5"),
+					@HystrixProperty(name="circuitBreaker.errorThresholdPercentage", value="50"),
+					@HystrixProperty(name="circuitBreaker.sleepWindowInMilliseconds", value="5000")
+					//@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000")
+	})
+	public ResponseEntity<Cart> PurchaseProduct(String locationName, Integer total, String productId, Product product) {
+		Cart cart =new Cart();
+		 Item myitem =new Item();
+		 
+		 System.out.println("\n ======>>>>>>>  "+product.toString());
+		//String productId =product.getProductId();
+		String _url1="http://producet-inventory-server/inventory/getitems/"+productId;
+	
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+	   
+	    headers.set("REI-COM-PERSIST", "true");
+	    headers.set("REI-COM-LOCATION", "USA");
+	    headers.add("cart", "purchase-products");
+	    
+        HttpEntity<Item[]> entity = new HttpEntity<Item[]>(headers);
+	    
+	   // HttpEntity<Product> prentity = new HttpEntity<Product>(headers);
+		
+	    
+	    ResponseEntity<Item[]> itemlists = restTemplate.exchange(_url1, HttpMethod.GET, entity, Item[].class);
+		
+		 List<Item> ilist=Arrays.asList(itemlists.getBody()).stream()
+		 .filter(tms -> (tms.getLocation().getName()).equalsIgnoreCase(locationName))
+		 .collect(Collectors.toList());
+		 
+		 myitem=ilist.get(0);
+		 System.out.println("\n-*******-->>>>>  "+myitem.toString());
+		 System.out.println("\n\n ---------------*******************************-------------------\n");
+		 
+		 System.out.println("\n--->>>>>  "+myitem.toString());
+		   int change =myitem.getQuantity() - total;
+		 
+		  if(change > 0) {
+			  myitem.setQuantity(change);
+		  }else {
+			  myitem.setQuantity(0);
+		  }
+	    //  kafkaProductProducer.sendMessage(myitem);
+		  cmap.put(product, total);
+	    String myid = UUID.randomUUID().toString();
+	    cart.setId(myid);
+	    cart.setItem(myitem);
+	    cart.setProduct(product);
+	    double mycharge = product.getPrice() * total;
+	    cart.setCharge(mycharge);
+	    cart.setTotal(total);
+	    cart.setCmap(cmap);
+	    //cart.insertProduct(product, total);
+	   System.out.println("\n----------"+cart.toString());
+	   System.out.println("\n-----**********************-----\n");
+	   kafkaProductProducer.sendMessage(myitem);
+	   return new ResponseEntity<Cart>(cart, HttpStatus.OK);
+		 
+	}
+	//art(String id, Product product, Integer total, double charge) String itemId, Product product, Integer total
+	//String locationName, Integer total, String productId, Product product
+	 public  ResponseEntity<Cart> getFallbackProduct(String locationName, Integer total, String productId, Product product) {
+		
+		     Cart cart =new Cart(productId, null, null, 0, 0.0);
+		 
+		return new ResponseEntity<>(cart, HttpStatus.EXPECTATION_FAILED);
+	}
+	 
+	 public ResponseEntity<Item[]> PurchaseProduct2(String itemId, String productId, String lname, Integer total) {
+			Cart cart =new Cart();
+			//Integer udNumber=0;
+			String _url1="http://producet-inventory-server/inventory/getitems/"+productId;
+			//String _url2="http://producet-supplier-server/product/find/"+productId;
+			//String _url3="http://producet-inventory-server/inventory/update/"+itemId+"/"+total;
+			HttpHeaders headers = new HttpHeaders();
+		    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		   
+		    headers.set("REI-COM-PERSIST", "true");
+		    headers.set("REI-COM-LOCATION", "USA");
+		    headers.add("cart", "purchase-products");
+		    HttpEntity<Item[]> entity = new HttpEntity<Item[]>(headers);
+		    
+		   
+		    
+		    ResponseEntity<Item[]> itemlists = restTemplate.exchange(_url1, HttpMethod.GET, entity, Item[].class);
+			
+			 List<Item> ilist=Arrays.asList(itemlists.getBody()).stream()
+			 .filter(tms -> (tms.getLocation().getName()).equalsIgnoreCase(lname))
+			 .collect(Collectors.toList());
+			 
+			
+		   
+		   return itemlists;
+				   //new ResponseEntity<Cart>(cart, HttpStatus.OK);
+			 
+		}
+}

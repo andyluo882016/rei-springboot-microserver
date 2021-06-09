@@ -1,0 +1,25 @@
+server.port=8812
+spring.banner.charset=UTF-8
+spring.banner.location= classpath:banner.txt
+spring.application.name=purchase-cart
+eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka
+eureka.client.register-with-eureka=true
+eureka.client.fetch-registry=true
+
+producet-inventory-server.ribbon.eureka.enabled=false
+producet-inventory-server.ribbon.listOfServers=localhost:8802,localhost:8803,localhost:8804
+producet-inventory-server.ribbon.ServerListRefreshInterval=1000
+##
+producet-inventory-server.ribbon.ConnectTimeout: 1000
+producet-inventory-server.ribbon.ReadTimeout: 3000
+producet-inventory-server.ribbon.MaxTotalHttpConnections: 500
+producet-inventory-server.ribbon.MaxConnectionsPerHost: 100
+##
+producet-supplier-server.ribbon.eureka.enabled=false
+producet-supplier-server.ribbon.listOfServers=localhost:8801,localhost:8879,localhost:8878
+producet-supplier-server.ribbon.ServerListRefreshInterval=1000
+##
+producet-supplier-server.ribbon.ConnectTimeout: 1000
+producet-supplier-server.ribbon.ReadTimeout: 3000
+producet-supplier-server.ribbon.MaxTotalHttpConnections: 500
+producet-supplier-server.ribbon.MaxConnectionsPerHost: 100

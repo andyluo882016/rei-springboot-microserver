@@ -1,0 +1,69 @@
+package com.example.demo.service;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import com.example.demo.module.*;
+import java.util.*;
+
+@Service
+public class PurchaseServer {
+
+	@Autowired
+	RestTemplate restTemplate;
+	
+	CartRepository cartRepository = new CartRepository();
+	
+	public Cart AddtoCart(String cartId, Product product, int quantity, Location location ) {
+		String _url1="http://producet-inventory-server/inventory/findall";
+		String _url2="http://producet-supplier-server/product/{productId}";
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+	   
+	    headers.set("REI-COM-PERSIST", "true");
+	    headers.set("REI-COM-LOCATION", "USA");
+	    headers.add("cart", "purchase-products");
+	    
+	     HttpEntity<Item[]> entity = new HttpEntity<Item[]>(headers);
+		  
+		 ResponseEntity<Item[]> itemlists = restTemplate.exchange(_url1, HttpMethod.GET, entity, Item[].class);
+		
+		 List<Item> ilist=Arrays.asList(itemlists.getBody()).stream()
+		 .filter(tm ->(tm.getProductId()).equals(product.getProductId()))
+		 .filter(tms -> (tms.getLocation().getName()).equalsIgnoreCase(location.getName()))
+		 .filter(pd ->pd.getQuantity() > quantity)
+		 .collect(Collectors.toList());
+		 
+		 Cart cart;
+		 if(cartId == null) {
+			 cart = new Cart();
+			 cartRepository.addCart(cart);
+		 }else {
+			 cart = cartRepository.getCart(cartId);
+			 if (cart == null) {
+                 cart = new Cart();
+                 cartRepository.addCart(cart);
+             }
+		 }
+		 
+		 //is this item already in the cart? If so add to the existing quantity
+         Integer existingQuantity = cart.getProducts().get(product);
+
+         if (existingQuantity != null) {
+             cart.getProducts().put(product, existingQuantity + quantity);
+         } else {
+             cart.getProducts().put(product, quantity);
+         }
+      
+         return cart;
+
+	}  
+}

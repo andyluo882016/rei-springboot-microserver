@@ -1,0 +1,53 @@
+package com.example.demo.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
+import com.example.demo.module.*;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+//import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+@Service
+@Scope("request")
+public class InventoryManager {
+
+	@Autowired
+	RestTemplate restTemplate;
+	
+       public ResponseEntity<Item[]> getAlls() {
+		// REI-COM-PERSIST :: " + headerPersist);
+   		//logger.info("Header REI-COM-LOCATION 
+		//http://localhost:8802/inventory/getalls
+        String url="http://producet-inventory-server/inventory/getalls";
+		
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+	   
+	    headers.set("REI-COM-PERSIST", "True");
+	    headers.set("REI-COM-LOCATION", "USA-WA");
+	    //HttpEntity<String> entity = new HttpEntity<String>(headers);
+		
+	     // List<Item> elist= new ArrayList<Item>();
+	
+		  HttpEntity<Item[]> entity = new HttpEntity<Item[]>(headers);
+		  
+		 ResponseEntity<Item[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, Item[].class);
+		 
+		 return response;
+		  
+	}
+}

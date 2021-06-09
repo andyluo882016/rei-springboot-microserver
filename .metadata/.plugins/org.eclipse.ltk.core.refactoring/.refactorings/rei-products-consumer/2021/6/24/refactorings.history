@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;rei-products-consumer&apos;&#x0D;&#x0A;- Original project: &apos;rei-products-consumer&apos;&#x0D;&#x0A;- Original element: &apos;com.example.demo.kafkaserver.KafkaBookProducer.java&apos;" description="Delete element" element1="/src\/main\/java&lt;com.example.demo.kafkaserver{KafkaBookProducer.java" elements="1" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1623022941245" subPackages="false" version="1.0"/>
+</session>

@@ -1,0 +1,31 @@
+package com.example.demo.controller;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.module.Location;
+import com.example.demo.module.Product;
+import com.example.demo.service.PurchaseServer;
+
+@RestController
+@RequestMapping("/cart")
+public class CartController {
+    @Autowired
+	PurchaseServer purchaseServer;
+    
+    //String cartId, Product product, int quantity, Location location
+    @GetMapping(path="/addcart/{cartId}/{quantity}", produces= MediaType.APPLICATION_JSON_VALUE)
+    public Map<Product, Integer> showcarts(@PathVariable("cartId") final String cartId, @RequestBody Product product, 
+    		@PathVariable("quantity") final Integer quantity, @RequestBody Location location
+    		) {
+    	
+    	return purchaseServer.AddtoCart(cartId, product, quantity, location).getProducts();
+    }
+}

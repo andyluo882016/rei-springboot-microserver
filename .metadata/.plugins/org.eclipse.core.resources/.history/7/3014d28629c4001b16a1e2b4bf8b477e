@@ -1,0 +1,55 @@
+package com.example.demo.module;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection="product")
+public class Product {
+
+	@Id
+	private String productId;
+    private String brand;
+    private String description;
+    private int price;
+  
+	public String getProductId() {
+		return productId;
+	}
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
+	public String getBrand() {
+		return brand;
+	}
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public int getPrice() {
+		return price;
+	}
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	public Product(String brand, String description, int price) {
+		super();
+		this.brand = brand;
+		this.description = description;
+		this.price = price;
+	}
+	public Product() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "Product [productId=" + productId + ", brand=" + brand + ", description=" + description + ", price="
+				+ price + "]";
+	}
+    
+}

@@ -1,0 +1,7 @@
+server.port=8802
+spring.application.name=producet-inventory-server
+eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka
+eureka.client.register-with-eureka=true
+eureka.client.fetch-registry=true
+
+

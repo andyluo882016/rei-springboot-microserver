@@ -1,0 +1,5 @@
+package com.example.demo.configu;
+
+public class Swagger2UiConfiguration {
+
+}

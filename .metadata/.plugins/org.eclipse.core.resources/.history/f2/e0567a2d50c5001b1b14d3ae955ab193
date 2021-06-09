@@ -1,0 +1,82 @@
+package com.example.demo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.*;
+
+import com.example.demo.exception.EmptyCollectionException;
+import com.example.demo.module.*;
+import com.example.demo.service.InventoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@RestController
+@RequestMapping("/inventory")
+public class InventoryController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(InventoryController.class);
+	
+   @Autowired
+	InventoryService inventoryService;
+   
+   @GetMapping(path="/findall")
+   public List<Item> findalls() {
+	   
+	   return inventoryService.findalls();
+   }
+   @PostMapping(path="/save", consumes=MediaType.APPLICATION_JSON_VALUE)
+   public Item saveoneitem(@RequestBody Item item) {
+	   
+	   return inventoryService.saveOne(item);
+   }
+   
+   @PutMapping(path="/update", consumes= MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+   public Item updatedOne(@RequestBody Item item) {
+	   
+	   return inventoryService.updatedItemByid(item);
+   }
+   @DeleteMapping(path="/delete/{id}")
+   public String deletItemById(@PathVariable("id") final String id) {
+	   
+	   inventoryService.deleteById(id);
+	   return "one Item with : "+id +" has been deleted";
+   }
+   @GetMapping(path="/findone/{id}", produces=MediaType.APPLICATION_JSON_VALUE)
+   public Item findById(@PathVariable("id") final String id) {
+	    
+	     return inventoryService.findById(id);
+   }
+   @GetMapping(path="/getitems/{pid}", produces=MediaType.APPLICATION_JSON_VALUE)
+   public List<Item> findByProductId(@PathVariable("pid") final String pid) {
+	   
+	   return inventoryService.findbyProductId(pid);
+   }
+   
+   @GetMapping(path="/getalls", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<Item>> finalls( @RequestHeader(name = "REI-COM-PERSIST", required = true) String headerPersist,
+			  @RequestHeader(name = "REI-COM-LOCATION", defaultValue = "USA") String headerLocation){
+		logger.info("Header REI-COM-PERSIST :: " + headerPersist);
+		logger.info("Header REI-COM-LOCATION :: " + headerLocation);
+		//inventoryService.findalls();
+		 List<Item> blist=inventoryService.findalls();
+		 
+		 blist.stream().forEach(p ->System.out.println(p.toString()));
+		 
+		 Optional<List<Item>> oplist= Optional.of(blist);
+		 if (oplist.isEmpty()) {
+			 throw new EmptyCollectionException("Empty List");
+		 }
+		 return new ResponseEntity<>(blist, HttpStatus.OK);
+	}
+}

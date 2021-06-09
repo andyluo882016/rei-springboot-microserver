@@ -1,0 +1,55 @@
+package com.example.demo.module;
+import java.util.*;
+public class Cart {
+
+	private String id;
+	private Item item;
+	private Product product;
+	private Integer total;
+	Map<Product, Integer> cmap= new HashMap<Product, Integer>();
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public Item getItem() {
+		return item;
+	}
+	public void setItem(Item item) {
+		this.item = item;
+	}
+	public Product getProduct() {
+		return product;
+	}
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+	public Integer getTotal() {
+		return total;
+	}
+	public void setTotal(Integer total) {
+		this.total = total;
+	}
+	public Map<Product, Integer> getCmap() {
+		return cmap;
+	}
+	
+	public Cart(String id, Item item, Product product, Integer total) {
+		super();
+		this.id = id;
+		this.item = item;
+		this.product = product;
+		this.total = total;
+	}
+	public Cart() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	public void insertProduct(Product prooduct, Integer numb) {
+	
+		 this.cmap.put(prooduct, numb);
+	}
+	
+}

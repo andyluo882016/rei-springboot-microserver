@@ -1,0 +1,101 @@
+package com.example.demo.controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.example.demo.exception.EmptyCollectionException;
+import com.example.demo.module.*;
+import com.example.demo.servies.*;
+
+@RestController
+@RequestMapping("/product")
+@CrossOrigin("*")
+public class ProductController {
+	private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+	
+    @Autowired
+	ProductService productService;
+    
+    @GetMapping(path="/findall", produces=MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Product>> findalls(@RequestHeader(name = "REI-COM-PERSIST", required = true) String headerPersist,
+			  @RequestHeader(name = "REI-COM-LOCATION", defaultValue = "USA") String headerLocation) {
+    	logger.info("Header REI-COM-PERSIST :: " + headerPersist);
+		logger.info("Header REI-COM-LOCATION :: " + headerLocation);
+		List<Product> list=productService.findalls();
+		if(list.isEmpty()) {
+			throw new EmptyCollectionException("The List is Empty");
+		}
+		else {
+		return new ResponseEntity<List<Product>>(list, HttpStatus.OK);
+		}
+    }
+    @PostMapping(path="/saveone", consumes=MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Product> saveProduct(@RequestBody Product product, @RequestHeader(name = "REI-COM-PERSIST", required = true) String headerPersist,
+			  @RequestHeader(name = "REI-COM-LOCATION", defaultValue = "USA") String headerLocation) {
+    	      logger.info("Header REI-COM-PERSIST :: " + headerPersist);
+		     logger.info("Header REI-COM-LOCATION :: " + headerLocation);
+    	      HttpHeaders header = new HttpHeaders();
+	          header.add("eri-product", "add one product");
+    	      productService.saveoneProduct(product);
+    	     return new ResponseEntity<Product>(product, HttpStatus.CREATED);
+    
+    	    
+    }
+    
+    @GetMapping(path="/page")
+    public Map<String, Object> getallpageInfor(@RequestParam(name="Pagenum", defaultValue="0") int Pagenum,
+    		@RequestParam(name="pagesize", defaultValue="2") int pagesize,
+    		@RequestParam(name="sortBy", defaultValue="id") String sortBy) {
+    	
+    	  return productService.getallProductsInPage(Pagenum, pagesize, sortBy);
+    	
+    }
+    @GetMapping(path="/find/{id}")
+    public ResponseEntity<Product> findoneByid(@PathVariable("id") final String id, @RequestHeader(name = "REI-COM-PERSIST", required = true) String headerPersist,
+			  @RequestHeader(name = "REI-COM-LOCATION", defaultValue = "USA") String headerLocation) {
+    	  logger.info("Header REI-COM-PERSIST :: " + headerPersist);
+		     logger.info("Header REI-COM-LOCATION :: " + headerLocation);
+ 	      HttpHeaders header = new HttpHeaders();
+	          header.add("eri-product", "find by id");
+           if (productService.existsofProductbyId(id)) {
+        	   Product product = productService.findProductById(id);
+    	    return ResponseEntity.status(HttpStatus.OK).headers(header).body(product);
+           }else {
+        	   //Product(String productId, String brand, String description, int price) {
+        	   //Product pd =new Product(id, null, null, 0);
+        	   return ResponseEntity.status(HttpStatus.BAD_REQUEST).headers(header).body(new Product(id, null, null, 0));
+           }
+    }
+    @DeleteMapping(path="/delete/{id}")
+    public String deleteProductById(@PathVariable("id") final String id, @RequestHeader(name = "REI-COM-PERSIST", required = true) String headerPersist,
+			  @RequestHeader(name = "REI-COM-LOCATION", defaultValue = "USA") String headerLocation) {
+    	 if(productService.existsofProductbyId(id)) {
+    		 return productService.deleteById(id);
+    	 }else {
+    		 return "the Product is not existed";
+    	 }
+    }
+    
+    @PutMapping(path="/updated", consumes=MediaType.APPLICATION_JSON_VALUE)
+    public Product updatedProduct(@RequestBody Product product, @RequestHeader(name = "REI-COM-PERSIST", required = true) String headerPersist,
+			  @RequestHeader(name = "REI-COM-LOCATION", defaultValue = "USA") String headerLocation) {
+    
+    	     return productService.updatedProduct(product);
+    }
+}

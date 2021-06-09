@@ -1,0 +1,9 @@
+package com.example.demo.module;
+
+public class Item {
+
+	private String id;
+	private String productId;
+	private int quantity;
+	private Location location;
+}

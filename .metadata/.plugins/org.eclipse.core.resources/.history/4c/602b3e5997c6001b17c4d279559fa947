@@ -1,0 +1,66 @@
+package com.example.demo.module;
+
+import java.util.*;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Cart {
+
+	private UUID cartId = UUID.randomUUID();
+	Map<Product, Integer> map = new HashMap<>();
+	public UUID getCartId() {
+		return cartId;
+	}
+	public void setCartId(UUID cartId) {
+		this.cartId = cartId;
+	}
+	public Map<Product, Integer> getMap() {
+		return map;
+	}
+	public void setMap(Map<Product, Integer> map) {
+		this.map = map;
+	}
+	public Cart(UUID cartId, Map<Product, Integer> map) {
+		super();
+		this.cartId = cartId;
+		this.map = map;
+	}
+	public Cart() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "Cart [cartId=" + cartId + ", map=" + map + "]";
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cartId == null) ? 0 : cartId.hashCode());
+		result = prime * result + ((map == null) ? 0 : map.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Cart other = (Cart) obj;
+		if (cartId == null) {
+			if (other.cartId != null)
+				return false;
+		} else if (!cartId.equals(other.cartId))
+			return false;
+		if (map == null) {
+			if (other.map != null)
+				return false;
+		} else if (!map.equals(other.map))
+			return false;
+		return true;
+	}
+	
+}

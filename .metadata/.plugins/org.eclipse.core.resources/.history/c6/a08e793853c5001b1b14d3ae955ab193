@@ -1,0 +1,64 @@
+package com.example.demo.module;
+import lombok.Data;
+
+@Data
+public class Location {
+
+	 private String name;
+	 private String satete;
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getSatete() {
+		return satete;
+	}
+	public void setSatete(String satete) {
+		this.satete = satete;
+	}
+	public Location(String name, String satete) {
+		super();
+		this.name = name;
+		this.satete = satete;
+	}
+	public Location() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "Location [name=" + name + ", satete=" + satete + "]";
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((satete == null) ? 0 : satete.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Location other = (Location) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (satete == null) {
+			if (other.satete != null)
+				return false;
+		} else if (!satete.equals(other.satete))
+			return false;
+		return true;
+	}
+	
+}
